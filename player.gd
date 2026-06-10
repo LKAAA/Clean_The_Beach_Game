@@ -1,8 +1,14 @@
 extends CharacterBody2D
 
+const GRABBABLE_OBJECT = preload("uid://co54mxkglvavc")
+const DUMPSTER_MAN = preload("uid://c4kp3dg10nc8k")
+
 @onready var interaction_timer: Timer = %InteractionTimer
 @onready var interaction_progress_bar: ProgressBar = %InteractionProgressBar
 
+@export var throw_distance: float = 200.0   # how far below player
+@export var throw_spread: float = 160.0      # horizontal randomness
+@export var throw_force: float = 400.0      # speed of throw
 @export var speed: float
 var input_vector: Vector2
 
@@ -13,13 +19,52 @@ var interaction_time: float = 1.0
 
 var trash_bags_dumped: int = 0
 
+
+
 func _ready() -> void:
 	interaction_progress_bar.visible = false
 
 func _physics_process(delta: float) -> void:
 	_handle_movement()
 	
-	if Input.is_action_just_pressed("interact") and interacting == false:
+	if Input.is_action_just_pressed("interact") and Global.current_tutorial_part == 1:
+		if grab_obj_list.is_empty():
+			print("No interactable object")
+			return
+		cur_grab_obj = grab_obj_list.front()
+		
+		if cur_grab_obj.dumpster:
+			print("Throw trash out")
+			if Global.current_tutorial_part == 1:
+				if not Global.thrown_trash == 4:
+					var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
+					get_parent().add_child(new_obj)
+					new_obj.global_position = global_position
+					new_obj.set_trash()
+					new_obj.grab_object.connect(tutorial_trash_taken)
+					throw_object(new_obj, global_position)
+					Global.thrown_trash += 1
+				
+				elif Global.thrown_trash == 4:
+					print("Throw man instead")
+					var new_obj: DumpsterMan = DUMPSTER_MAN.instantiate()
+					get_parent().add_child(new_obj)
+					new_obj.global_position = global_position
+					throw_object(new_obj, global_position, true)
+					Global.current_tutorial_part = 2
+			else:
+				var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
+				get_parent().add_child(new_obj)
+				new_obj.global_position = global_position
+				new_obj.set_trash()
+				new_obj.grab_object.connect(tutorial_trash_taken)
+				throw_object(new_obj, global_position)
+	
+	if Input.is_action_just_pressed("interact") and Global.current_tutorial_part == 2:
+		print("Open dialogue with dumpster man for tutorial")
+		Global.current_tutorial_part = 3
+	
+	if Input.is_action_just_pressed("interact") and interacting == false and Global.current_tutorial_part > 2:
 		if grab_obj_list.is_empty():
 			print("No interactable object")
 			return
@@ -32,16 +77,20 @@ func _physics_process(delta: float) -> void:
 					var temp = grab_obj
 					grab_obj_list.erase(grab_obj)
 					grab_obj_list.push_front(temp)
-					print("Now front")
 			
 			cur_grab_obj = grab_obj_list.front()
-			print("Here")
 		
 		if not cur_grab_obj:
-			print("No cur")
 			return
 		# If Dumpster
 		if cur_grab_obj.dumpster:
+			if Global.current_tutorial_part == 4:
+				Global.holding_trash_bag = false
+				trash_bags_dumped += 1
+				Global.cur_trash_count = 0
+				print("Dumped tutorial trash bag.")
+				print("Bags dumped: " + str(trash_bags_dumped))
+				Global.current_tutorial_part = 5
 			if Global.holding_trash_bag:
 				Global.holding_trash_bag = false
 				trash_bags_dumped += 1
@@ -57,7 +106,7 @@ func _physics_process(delta: float) -> void:
 			else:
 				print("Already holding a trash bag. Take it to the dumpster first.")
 		elif cur_grab_obj.coconut_shop:
-			if Global.interact_level != 9 and Global.coconut_count > 0:
+			if Global.interact_level != 5 and Global.coconut_count > 0:
 				Global.interact_level += 1
 				Global.coconut_count -= 1
 			else:
@@ -127,10 +176,7 @@ func stop_interacting() -> void:
 
 func _on_interactable_area_entered(area: Area2D) -> void:
 	if area is GrabbableObject:
-		print("Is a grabble object")
 		grab_obj_list.append(area)
-	else:
-		print("Area entered, idk what is")
 
 func _on_interactable_area_exited(area: Area2D) -> void:
 	if area is GrabbableObject:
@@ -138,8 +184,6 @@ func _on_interactable_area_exited(area: Area2D) -> void:
 			grab_obj_list.erase(area)
 		if area == cur_grab_obj:
 			stop_interacting()
-	else:
-		print("Area entered, idk what is")
 	
 
 func _on_interaction_timer_timeout() -> void:
@@ -149,14 +193,14 @@ func _on_interaction_timer_timeout() -> void:
 	if cur_grab_obj.coconut:
 		Global.coconut_count += 1
 		print("Coconut count: " + str(Global.coconut_count))
-		cur_grab_obj.grab_object.emit(cur_grab_obj)
+		cur_grab_obj.grab_object.emit()
 		cur_grab_obj.queue_free()
 		stop_interacting()
 		return
 	if Global.holding_trash_bag and (Global.cur_trash_count + cur_grab_obj.trash_points) <= Global.max_trash_count: 
 		Global.cur_trash_count += cur_grab_obj.trash_points
 		print("Trash Points: " + str(Global.cur_trash_count))
-		cur_grab_obj.grab_object.emit(cur_grab_obj)
+		cur_grab_obj.grab_object.emit()
 		cur_grab_obj.queue_free()
 		if Global.cur_trash_count == Global.max_trash_count:
 			print("Bag is now full")
@@ -165,4 +209,24 @@ func _on_interaction_timer_timeout() -> void:
 	
 	
 	stop_interacting()
-	
+
+func throw_object(obj: Area2D, player_pos: Vector2, man: bool = false):
+	var target = get_random_throw_target(player_pos)
+	var direction = (target - obj.global_position).normalized()
+	var new_throw_force: float = 0
+	if man:
+		new_throw_force = (throw_force)
+	else:
+		new_throw_force = (throw_force + randf_range(100, 150))
+	obj.velocity = direction * new_throw_force
+
+func get_random_throw_target(player_pos: Vector2) -> Vector2:
+	var random_x = randf_range(-throw_spread, throw_spread)
+	return player_pos + Vector2(random_x, throw_distance)
+
+func tutorial_trash_taken() -> void:
+	print("Tutorial Trash Taken")
+	Global.tutorial_trash_collected += 1
+	if Global.tutorial_trash_collected == 4:
+		print("picked up all tutorial trash")
+		Global.current_tutorial_part = 4

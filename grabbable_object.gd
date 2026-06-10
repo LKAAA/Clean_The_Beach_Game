@@ -14,6 +14,9 @@ const TRASH_BAG_SHADOW = preload("uid://6lqbxc8wyrjp")
 @export var trash_bag: bool = false
 @export var coconut_shop: bool = false
 
+var velocity: Vector2 = Vector2.ZERO
+@export var friction: float = 0.9
+
 signal grab_object(obj)
 
 func _ready() -> void:
@@ -22,6 +25,11 @@ func _ready() -> void:
 	if trash_bag:
 		sprite.texture = TRASH_BAG
 		shadow_sprite.texture = TRASH_BAG_SHADOW
+
+func _physics_process(delta):
+	if velocity.length() > 0.1:
+		global_position += velocity * delta
+		velocity *= friction  # slows it down over time
 
 func set_coconut() -> void:
 	sprite_setup()

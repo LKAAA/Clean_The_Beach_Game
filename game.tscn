@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cam3qgana8xuf" path="res://player.tscn" id="1_e2o6t"]
 [ext_resource type="Texture2D" uid="uid://cgj8ejlafp1ew" path="res://Assets/Tilesets/BeachAnimatedSpriteSheet.png" id="1_fc0e3"]
-[ext_resource type="PackedScene" uid="uid://co54mxkglvavc" path="res://grabbale_object.tscn" id="2_feb5d"]
+[ext_resource type="PackedScene" uid="uid://co54mxkglvavc" path="res://grabbable_object.tscn" id="2_feb5d"]
 [ext_resource type="Script" uid="uid://7jfja5q04pxl" path="res://interactable_spawn_area.gd" id="3_feb5d"]
 [ext_resource type="Script" uid="uid://d2bhxmk7e73f" path="res://game_ui.gd" id="5_7jktm"]
 [ext_resource type="Texture2D" uid="uid://cs5uqyjinp2l1" path="res://Assets/Sprites/TrashSprites.png" id="6_eow3j"]
