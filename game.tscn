@@ -1,12 +1,15 @@
-[gd_scene load_steps=12 format=4 uid="uid://b6084mn03x7wj"]
+[gd_scene load_steps=15 format=4 uid="uid://b6084mn03x7wj"]
 
 [ext_resource type="PackedScene" uid="uid://cam3qgana8xuf" path="res://player.tscn" id="1_e2o6t"]
 [ext_resource type="Texture2D" uid="uid://cgj8ejlafp1ew" path="res://Assets/Tilesets/BeachAnimatedSpriteSheet.png" id="1_fc0e3"]
+[ext_resource type="Script" uid="uid://bbyl1owkxjvq2" path="res://core.gd" id="1_hve3p"]
 [ext_resource type="PackedScene" uid="uid://co54mxkglvavc" path="res://grabbable_object.tscn" id="2_feb5d"]
 [ext_resource type="Script" uid="uid://7jfja5q04pxl" path="res://interactable_spawn_area.gd" id="3_feb5d"]
 [ext_resource type="Script" uid="uid://d2bhxmk7e73f" path="res://game_ui.gd" id="5_7jktm"]
 [ext_resource type="Texture2D" uid="uid://cs5uqyjinp2l1" path="res://Assets/Sprites/TrashSprites.png" id="6_eow3j"]
 [ext_resource type="FontFile" uid="uid://0fo6tgwxoje7" path="res://Assets/Sprites/Fonts/TeenyTinyPixls-o2zo.ttf" id="6_ryrav"]
+[ext_resource type="PackedScene" uid="uid://brud1m1a1x6se" path="res://Dialogue/dialogue.tscn" id="8_vef74"]
+[ext_resource type="Script" uid="uid://cphq3chhsjrct" path="res://Dialogue/dialogue_manager.gd" id="9_hve3p"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7jktm"]
 texture = ExtResource("1_fc0e3")
@@ -54,7 +57,8 @@ radius = 87.36704
 atlas = ExtResource("6_eow3j")
 region = Rect2(0, 0, 16, 16)
 
-[node name="Game" type="Node2D"]
+[node name="Core" type="Node2D"]
+script = ExtResource("1_hve3p")
 
 [node name="BeachTilelayer" type="TileMapLayer" parent="."]
 texture_filter = 1
@@ -199,5 +203,21 @@ text = "No Bag 000"
 fit_content = true
 autowrap_mode = 0
 vertical_alignment = 1
+
+[node name="Dialogue" parent="UI" instance=ExtResource("8_vef74")]
+unique_name_in_owner = true
+visible = false
+
+[node name="Dialogue_Manager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("9_hve3p")
+
+[node name="DialogueCooldownTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+
+[connection signal="finished" from="Dialogue_Manager" to="." method="_on_dialogue_manager_finished"]
+[connection signal="message_completed" from="Dialogue_Manager" to="." method="_on_dialogue_manager_message_completed"]
+[connection signal="message_requested" from="Dialogue_Manager" to="." method="_on_dialogue_manager_message_requested"]
+[connection signal="timeout" from="DialogueCooldownTimer" to="." method="_on_dialogue_cooldown_timer_timeout"]
 
 [editable path="Trash_Bag"]

@@ -25,6 +25,8 @@ func _ready() -> void:
 	interaction_progress_bar.visible = false
 
 func _physics_process(delta: float) -> void:
+	if Global.dialogue_active:
+		return
 	_handle_movement()
 	
 	if Input.is_action_just_pressed("interact") and Global.current_tutorial_part == 1:
@@ -106,11 +108,43 @@ func _physics_process(delta: float) -> void:
 			else:
 				print("Already holding a trash bag. Take it to the dumpster first.")
 		elif cur_grab_obj.coconut_shop:
-			if Global.interact_level != 5 and Global.coconut_count > 0:
+			if not Progression.met_squirrel:
+				Global.core._request_dialogue(["Psst.{p=0.3} Hey.{p=0.3} Over here.",  
+				"Got any nuts?", 
+				"Coconuts that is.", 
+				"I’ll buy em off ya.{p=0.3} I’ll teach ya things.", 
+				"Great things.{p=0.3} Like how to pick up faster.", 
+				"I’m good at that, yeah?{p=0.3} Great at that.{p=0.3} Squirrel thing, ya know?", 
+				"Let me know if you find any.{p=0.3} Sees ya's around."], 
+				"Squirrel")
+				Progression.met_squirrel = true
+			elif Global.interact_level != 4 and Global.coconut_count > 0:
+				Global.core._request_dialogue(["Oh yeah that's a good nut.",  
+				"Could do with more ya know.", 
+				"Coconuts that is.", 
+				"But here ya go, watch closely.{p=0.3} You pick it up like this yeah?", 
+				"*Picks up coconut*", 
+				"See, like that.", 
+				"*You now know how to pick things up slightly faster.{p=0.3} He’s a good teacher.*"], 
+				"Squirrel")
 				Global.interact_level += 1
 				Global.coconut_count -= 1
+			elif Global.interact_level == 4 and Global.coconut_count > 0:
+				Global.core._request_dialogue(["This might be the best one yet.", 
+				"I’ll teach you my magnum opus yeah?", 
+				"*The squirrel picks up the coconut, but this time an explosion appears when he picks it up.*", 
+				"*You now know how to pick things up with style.{p=0.3} He’s a really good teacher.*"
+				], "Squirrel")
+				Global.interact_level += 1
+				Global.coconut_count -= 1
+			elif Global.coconut_count > 0:
+				Global.core._request_dialogue(["I ain’t got no more to teach ya, yeah?", 
+				"You a master now yeah?", 
+				"Though that coconut do look tasty…"], 
+				"Squirrel")
 			else:
-				print("Interact level max")
+				Global.core._request_dialogue(["Let's me know if you find any coconuts."], 
+				"Squirrel")
 			print("Open Shop")
 		# If coconut or trash pick up
 		else:
@@ -193,14 +227,14 @@ func _on_interaction_timer_timeout() -> void:
 	if cur_grab_obj.coconut:
 		Global.coconut_count += 1
 		print("Coconut count: " + str(Global.coconut_count))
-		cur_grab_obj.grab_object.emit()
+		cur_grab_obj.grab_object.emit(cur_grab_obj)
 		cur_grab_obj.queue_free()
 		stop_interacting()
 		return
 	if Global.holding_trash_bag and (Global.cur_trash_count + cur_grab_obj.trash_points) <= Global.max_trash_count: 
 		Global.cur_trash_count += cur_grab_obj.trash_points
 		print("Trash Points: " + str(Global.cur_trash_count))
-		cur_grab_obj.grab_object.emit()
+		cur_grab_obj.grab_object.emit(cur_grab_obj)
 		cur_grab_obj.queue_free()
 		if Global.cur_trash_count == Global.max_trash_count:
 			print("Bag is now full")

@@ -1,5 +1,7 @@
 extends Node
 
+var core: Core
+
 var coconut_count: int = 0
 var cur_trash_count: int = 0
 var holding_trash_bag: bool = false
@@ -17,3 +19,5 @@ signal region_complete
 var current_tutorial_part: int = 1
 var thrown_trash: int = 0
 var tutorial_trash_collected: int = 0
+
+var dialogue_active := false

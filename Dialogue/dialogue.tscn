@@ -1,0 +1,159 @@
+[gd_scene load_steps=7 format=3 uid="uid://brud1m1a1x6se"]
+
+[ext_resource type="Texture2D" uid="uid://dc6gel4lthgc3" path="res://Assets/Sprites/WhiteBox.png" id="1_1ei20"]
+[ext_resource type="Script" uid="uid://ciudr4cydimjl" path="res://Dialogue/dialogue.gd" id="1_mvbsq"]
+[ext_resource type="FontFile" uid="uid://0fo6tgwxoje7" path="res://Assets/Sprites/Fonts/TeenyTinyPixls-o2zo.ttf" id="2_je2oo"]
+[ext_resource type="Script" uid="uid://b2l8w5kqavhkt" path="res://Dialogue/random_sound_player.gd" id="3_jx425"]
+[ext_resource type="Script" uid="uid://bh65x84blale3" path="res://Dialogue/dialogue_commands.gd" id="4_gioa1"]
+[ext_resource type="AudioStream" uid="uid://2ci6iy6hfc5d" path="res://Assets/Sound/Blop-Mark_DiAngelo-79054334-modified.wav" id="4_sqmlx"]
+
+[node name="Dialogue" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mvbsq")
+
+[node name="DialogueContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 96
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DialogueContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Character_Name_Section" type="HBoxContainer" parent="DialogueContainer/VBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+
+[node name="TextureRect2" type="TextureRect" parent="DialogueContainer/VBoxContainer/Character_Name_Section"]
+self_modulate = Color(0.05490196, 0.12941177, 0.2509804, 1)
+clip_contents = true
+custom_minimum_size = Vector2(80, 14)
+layout_mode = 2
+texture = ExtResource("1_1ei20")
+expand_mode = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogueContainer/VBoxContainer/Character_Name_Section/TextureRect2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -3.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 0
+
+[node name="TextureRect" type="TextureRect" parent="DialogueContainer/VBoxContainer/Character_Name_Section/TextureRect2/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("1_1ei20")
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogueContainer/VBoxContainer/Character_Name_Section/TextureRect2/MarginContainer/TextureRect"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.031000001
+anchor_right = 1.0
+anchor_bottom = 0.781
+offset_top = 0.0039999783
+offset_bottom = 0.00399971
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 1
+
+[node name="Name_Text_Label" type="RichTextLabel" parent="DialogueContainer/VBoxContainer/Character_Name_Section/TextureRect2/MarginContainer/TextureRect/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.12591085, 0.12591085, 0.12591082, 1)
+theme_override_fonts/normal_font = ExtResource("2_je2oo")
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="TextureRect3" type="TextureRect" parent="DialogueContainer/VBoxContainer/Character_Name_Section"]
+self_modulate = Color(0.9647059, 0.41960785, 0.50980395, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="DialogueContainer/VBoxContainer"]
+self_modulate = Color(0.05490196, 0.12941177, 0.2509804, 1)
+layout_mode = 2
+size_flags_vertical = 3
+texture = ExtResource("1_1ei20")
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogueContainer/VBoxContainer/TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="TextureRect" type="TextureRect" parent="DialogueContainer/VBoxContainer/TextureRect/MarginContainer"]
+layout_mode = 2
+texture = ExtResource("1_1ei20")
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogueContainer/VBoxContainer/TextureRect/MarginContainer/TextureRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="Dialogue_Text_Label" type="RichTextLabel" parent="DialogueContainer/VBoxContainer/TextureRect/MarginContainer/TextureRect/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/default_color = Color(0.05601912, 0.13050216, 0.25144166, 1)
+theme_override_fonts/normal_font = ExtResource("2_je2oo")
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+text = "Dialogue Here"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+
+[node name="TypeTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.04
+
+[node name="PauseTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+one_shot = true
+
+[node name="DialogueCommands" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_gioa1")
+
+[node name="RandomSoundPlayer" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("4_sqmlx")
+script = ExtResource("3_jx425")
+
+[connection signal="timeout" from="TypeTimer" to="." method="_on_type_timer_timeout"]
+[connection signal="timeout" from="PauseTimer" to="." method="_on_pause_timer_timeout"]
+[connection signal="pause_requested" from="DialogueCommands" to="." method="_on_dialogue_commands_pause_requested"]
+[connection signal="finished" from="RandomSoundPlayer" to="." method="_on_random_sound_player_finished"]
