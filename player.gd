@@ -19,6 +19,8 @@ var interaction_time: float = 1.0
 
 var trash_bags_dumped: int = 0
 
+var cur_door: CoconutDoor = null
+
 
 
 func _ready() -> void:
@@ -67,6 +69,12 @@ func _physics_process(delta: float) -> void:
 		Global.current_tutorial_part = 3
 	
 	if Input.is_action_just_pressed("interact") and interacting == false and Global.current_tutorial_part > 2:
+		if cur_door:
+			print("Open door")
+			
+			if Global.coconut_count > 0:
+				cur_door.open_door()
+		
 		if grab_obj_list.is_empty():
 			print("No interactable object")
 			return
@@ -211,6 +219,10 @@ func stop_interacting() -> void:
 func _on_interactable_area_entered(area: Area2D) -> void:
 	if area is GrabbableObject:
 		grab_obj_list.append(area)
+	
+	if area is CoconutDoor:
+		cur_door = area
+		print("Coconut door")
 
 func _on_interactable_area_exited(area: Area2D) -> void:
 	if area is GrabbableObject:
@@ -218,6 +230,8 @@ func _on_interactable_area_exited(area: Area2D) -> void:
 			grab_obj_list.erase(area)
 		if area == cur_grab_obj:
 			stop_interacting()
+	if area is CoconutDoor:
+		cur_door = null
 	
 
 func _on_interaction_timer_timeout() -> void:

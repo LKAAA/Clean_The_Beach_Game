@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=4 uid="uid://b6084mn03x7wj"]
+[gd_scene load_steps=16 format=4 uid="uid://b6084mn03x7wj"]
 
 [ext_resource type="PackedScene" uid="uid://cam3qgana8xuf" path="res://player.tscn" id="1_e2o6t"]
 [ext_resource type="Texture2D" uid="uid://cgj8ejlafp1ew" path="res://Assets/Tilesets/BeachAnimatedSpriteSheet.png" id="1_fc0e3"]
@@ -10,6 +10,7 @@
 [ext_resource type="FontFile" uid="uid://0fo6tgwxoje7" path="res://Assets/Sprites/Fonts/TeenyTinyPixls-o2zo.ttf" id="6_ryrav"]
 [ext_resource type="PackedScene" uid="uid://brud1m1a1x6se" path="res://Dialogue/dialogue.tscn" id="8_vef74"]
 [ext_resource type="Script" uid="uid://cphq3chhsjrct" path="res://Dialogue/dialogue_manager.gd" id="9_hve3p"]
+[ext_resource type="PackedScene" uid="uid://bviolgs2uqwk2" path="res://coconut_door.tscn" id="11_mfdv2"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7jktm"]
 texture = ExtResource("1_fc0e3")
@@ -214,6 +215,9 @@ script = ExtResource("9_hve3p")
 
 [node name="DialogueCooldownTimer" type="Timer" parent="."]
 unique_name_in_owner = true
+
+[node name="CoconutDoor" parent="." instance=ExtResource("11_mfdv2")]
+position = Vector2(421, -192)
 
 [connection signal="finished" from="Dialogue_Manager" to="." method="_on_dialogue_manager_finished"]
 [connection signal="message_completed" from="Dialogue_Manager" to="." method="_on_dialogue_manager_message_completed"]
