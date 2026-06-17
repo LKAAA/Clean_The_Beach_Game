@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c4kp3dg10nc8k"]
 
 [ext_resource type="Script" uid="uid://bipca3sh1b3ai" path="res://dumpster_man.gd" id="1_gthcl"]
-[ext_resource type="Texture2D" uid="uid://8w54gk0laxbm" path="res://Assets/Sprites/DebugSprite.png" id="2_2tb6b"]
+[ext_resource type="Texture2D" uid="uid://s08otuhuok52" path="res://Assets/Sprites/SmallOldMan.png" id="2_2tb6b"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_k80x7"]
 

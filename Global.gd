@@ -21,3 +21,5 @@ var thrown_trash: int = 0
 var tutorial_trash_collected: int = 0
 
 var dialogue_active := false
+
+var cur_man = null

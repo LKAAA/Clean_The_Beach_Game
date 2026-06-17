@@ -153,6 +153,23 @@ unique_name_in_owner = true
 stream = ExtResource("4_sqmlx")
 script = ExtResource("3_jx425")
 
+[node name="Dialogue_Text_Label2" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 98.0
+offset_right = 280.0
+offset_bottom = 110.0
+size_flags_vertical = 8
+theme_override_colors/default_color = Color(0.05601912, 0.13050216, 0.25144166, 1)
+theme_override_fonts/normal_font = ExtResource("2_je2oo")
+theme_override_font_sizes/normal_font_size = 10
+bbcode_enabled = true
+text = "E to Continue"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+horizontal_alignment = 2
+
 [connection signal="timeout" from="TypeTimer" to="." method="_on_type_timer_timeout"]
 [connection signal="timeout" from="PauseTimer" to="." method="_on_pause_timer_timeout"]
 [connection signal="pause_requested" from="DialogueCommands" to="." method="_on_dialogue_commands_pause_requested"]
