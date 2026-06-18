@@ -2,6 +2,7 @@ class_name Core extends Node2D
 
 @onready var dialogue_manager: DialogueManager = %Dialogue_Manager
 @onready var dialogue_cooldown_timer: Timer = %DialogueCooldownTimer
+@onready var player: CharacterBody2D = %Player
 
 var dialogue_cooldown: bool = false
 
@@ -14,6 +15,7 @@ func _request_dialogue(messages: Array[String], display_name: String) -> void:
 	print("Requesting Dialogue")
 	if not dialogue_cooldown:
 		dialogue_manager.show_messages(messages, display_name)
+		player.sprite.stop()
 
 func _on_dialogue_manager_finished() -> void:
 	dialogue_cooldown_timer.start(0.5)

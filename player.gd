@@ -1,7 +1,9 @@
-extends CharacterBody2D
+class_name Player extends CharacterBody2D 
 
 const GRABBABLE_OBJECT = preload("uid://co54mxkglvavc")
 const DUMPSTER_MAN = preload("uid://c4kp3dg10nc8k")
+
+@onready var sprite: AnimatedSprite2D = %Sprite
 
 @onready var interaction_timer: Timer = %InteractionTimer
 @onready var interaction_progress_bar: ProgressBar = %InteractionProgressBar
@@ -10,6 +12,7 @@ const DUMPSTER_MAN = preload("uid://c4kp3dg10nc8k")
 @export var throw_spread: float = 160.0      # horizontal randomness
 @export var throw_force: float = 400.0      # speed of throw
 @export var speed: float
+var prev_direction: int
 var input_vector: Vector2
 
 var grab_obj_list: Array[GrabbableObject] = []
@@ -21,7 +24,6 @@ var trash_bags_dumped: int = 0
 
 var cur_door: CoconutDoor = null
 var cur_man: DumpsterMan = null
-
 
 
 func _ready() -> void:
@@ -86,17 +88,11 @@ func _physics_process(delta: float) -> void:
 		Global.cur_man = cur_man
 		Global.current_tutorial_part = 3
 	
-	if Input.is_action_just_pressed("interact") and interacting == false and Global.current_tutorial_part == 3:
-		if cur_door:
-			print("Open door")
-			
-			if Global.coconut_count > 0:
-				cur_door.open_door()
-		
+	if Input.is_action_just_pressed("interact") and interacting == false and (Global.current_tutorial_part == 3 or Global.current_tutorial_part == 4):
+		print("We made it to here")
 		if grab_obj_list.is_empty():
 			print("No interactable object")
 			return
-		
 		
 		if not grab_obj_list.is_empty():
 			# Always target coconuts first
@@ -112,18 +108,11 @@ func _physics_process(delta: float) -> void:
 			return
 		# If Dumpster
 		if cur_grab_obj.dumpster:
-			if Global.current_tutorial_part == 4:
-				Global.holding_trash_bag = false
-				trash_bags_dumped += 1
-				Global.cur_trash_count = 0
-				print("Dumped tutorial trash bag.")
-				print("Bags dumped: " + str(trash_bags_dumped))
-				Global.current_tutorial_part = 5
 			if Global.holding_trash_bag:
 				Global.holding_trash_bag = false
 				trash_bags_dumped += 1
 				Global.cur_trash_count = 0
-				print("Dumped a trash bag.")
+				print("Dumped tutorial trash bag.")
 				print("Bags dumped: " + str(trash_bags_dumped))
 				Global.core._request_dialogue(["*You hear muffled shuffling as you drop the bag in*", 
 				"Wow great job cleaning up. Never seen a beach so sandy and so not trashy!", 
@@ -137,7 +126,7 @@ func _physics_process(delta: float) -> void:
 				new_obj.global_position = global_position
 				new_obj.set_coconut()
 				throw_object(new_obj, global_position)
-				Global.current_tutorial_part = 4
+				Global.current_tutorial_part = 5
 				
 		# If Trash Bag
 		elif cur_grab_obj.trash_bag:
@@ -147,46 +136,6 @@ func _physics_process(delta: float) -> void:
 				print("Picked up a trashbag")
 			else:
 				print("Already holding a trash bag. Take it to the dumpster first.")
-		elif cur_grab_obj.coconut_shop:
-			if not Progression.met_squirrel:
-				Global.core._request_dialogue(["Psst.{p=0.3} Hey.{p=0.3} Over here.",  
-				"Got any nuts?", 
-				"Coconuts that is.", 
-				"I’ll buy em off ya.{p=0.3} I’ll teach ya things.", 
-				"Great things.{p=0.3} Like how to pick up faster.", 
-				"I’m good at that, yeah?{p=0.3} Great at that.{p=0.3} Squirrel thing, ya know?", 
-				"Let me know if you find any.{p=0.3} Sees ya's around."], 
-				"Squirrel")
-				Progression.met_squirrel = true
-			elif Global.interact_level != 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["Oh yeah that's a good nut.",  
-				"Could do with more ya know.", 
-				"Coconuts that is.", 
-				"But here ya go, watch closely.{p=0.3} You pick it up like this yeah?", 
-				"*Picks up coconut*", 
-				"See, like that.", 
-				"*You now know how to pick things up slightly faster.{p=0.3} He’s a good teacher.*"], 
-				"Squirrel")
-				Global.interact_level += 1
-				Global.coconut_count -= 1
-			elif Global.interact_level == 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["This might be the best one yet.", 
-				"I’ll teach you my magnum opus yeah?", 
-				"*The squirrel picks up the coconut, but this time an explosion appears when he picks it up.*", 
-				"*You now know how to pick things up with style.{p=0.3} He’s a really good teacher.*"
-				], "Squirrel")
-				Global.interact_level += 1
-				Global.coconut_count -= 1
-			elif Global.coconut_count > 0:
-				Global.core._request_dialogue(["I ain’t got no more to teach ya, yeah?", 
-				"You a master now yeah?", 
-				"Though that coconut do look tasty…"], 
-				"Squirrel")
-			else:
-				Global.core._request_dialogue(["Let's me know if you find any coconuts."], 
-				"Squirrel")
-			print("Open Shop")
-		# If coconut or trash pick up
 		else:
 			if Global.holding_trash_bag or cur_grab_obj.coconut:
 				interacting = true
@@ -197,7 +146,7 @@ func _physics_process(delta: float) -> void:
 			else:
 				print("Not holding trash bag")
 	
-	if Input.is_action_just_pressed("interact") and interacting == false and Global.current_tutorial_part > 3:
+	if Input.is_action_just_pressed("interact") and interacting == false and Global.current_tutorial_part >= 5:
 		if cur_door:
 			print("Open door")
 			
@@ -223,13 +172,6 @@ func _physics_process(delta: float) -> void:
 			return
 		# If Dumpster
 		if cur_grab_obj.dumpster:
-			if Global.current_tutorial_part == 4:
-				Global.holding_trash_bag = false
-				trash_bags_dumped += 1
-				Global.cur_trash_count = 0
-				print("Dumped tutorial trash bag.")
-				print("Bags dumped: " + str(trash_bags_dumped))
-				Global.current_tutorial_part = 5
 			if Global.holding_trash_bag:
 				Global.holding_trash_bag = false
 				trash_bags_dumped += 1
@@ -304,7 +246,7 @@ func _physics_process(delta: float) -> void:
 		interaction_progress_bar.value = ((interaction_time - (0.1 * Global.interact_level)) - interaction_timer.time_left) * 100
 		
 	
-	#_handle_movement_anims()
+	_handle_movement_anims()
 	
 	move_and_slide()
 
@@ -316,29 +258,49 @@ func _handle_movement() -> void:
 	velocity = velocity.limit_length(speed)
 
 
-#func _handle_movement_anims() -> void:
-	#if input_vector.x > 0:
-		#sprite.play("Walk_Right")
-		#prev_direction = 3
-	#elif input_vector.x < 0:
-		#sprite.play("Walk_Left")
-		#prev_direction = 4
-	#elif input_vector.y < 0:
-		#sprite.play("Walk_Up")
-		#prev_direction = 1
-	#elif input_vector.y > 0:
-		#sprite.play("Walk_Down")
-		#prev_direction = 2
-	#else:
-		#_play_idle_animation()
-#
-#func _play_idle_animation() -> void:
-	#match prev_direction:
-		#1: sprite.play("Idle_Up")
-		#2: sprite.play("Idle_Down")
-		#3: sprite.play("Idle_Right")
-		#4: sprite.play("Idle_Left")
-		#_: sprite.play("Idle_Down")
+func _handle_movement_anims() -> void:
+	if Global.holding_trash_bag:
+		if input_vector.y < 0 :
+			sprite.play("Walk_Up_Trashbag")
+			prev_direction = 1
+		elif input_vector.y > 0:
+			sprite.play("Walk_Down_Trashbag")
+			prev_direction = 2
+		elif input_vector.x > 0:
+			sprite.play("Walk_Down_Trashbag")
+			prev_direction = 2
+		elif input_vector.x < 0:
+			sprite.play("Walk_Down_Trashbag")
+			prev_direction = 2
+		else:
+			_play_idle_animation()
+	else:
+		if input_vector.y < 0:
+			sprite.play("Walk_Up")
+			prev_direction = 1
+		elif input_vector.y > 0:
+			sprite.play("Walk_Down")
+			prev_direction = 2
+		elif input_vector.x > 0:
+			sprite.play("Walk_Down")
+			prev_direction = 2
+		elif input_vector.x < 0:
+			sprite.play("Walk_Down")
+			prev_direction = 2
+		else:
+			_play_idle_animation()
+
+func _play_idle_animation() -> void:
+	if Global.holding_trash_bag:
+		match prev_direction:
+			1: sprite.play("Idle_Up_Trashbag")
+			2: sprite.play("Idle_Down_Trashbag")
+			_: sprite.play("Idle_Down_Trashbag")
+	else:
+		match prev_direction:
+			1: sprite.play("Idle_Up")
+			2: sprite.play("Idle_Down")
+			_: sprite.play("Idle_Down")
 
 func stop_interacting() -> void:
 	cur_grab_obj = null

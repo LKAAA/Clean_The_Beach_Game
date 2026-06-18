@@ -15,9 +15,10 @@ var spawned_trash: Array = []
 var spawned_coconuts: Array = []
 
 func _ready() -> void:
-	for i in max_spawned_trash:
+	for i in range(max_spawned_trash):
 		spawn_trash()
-	for c in max_spawned_coconuts:
+
+	for i in range(max_spawned_coconuts):
 		spawn_coconut()
 
 func _physics_process(_delta: float) -> void:
@@ -35,11 +36,9 @@ func _physics_process(_delta: float) -> void:
 		Global.completed_regions += 1
 		Global.emit_signal("region_complete")
 		queue_free()
-	 
-
 
 func spawn_coconut() -> void:
-	var spawn_pos = get_valid_spawn_position(global_position, spawnable_area.shape.radius, 8, 15)
+	var spawn_pos = get_valid_spawn_position_box(spawnable_area, 8, 15)
 	var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
 	add_child(new_obj)
 	new_obj.global_position = spawn_pos
@@ -49,7 +48,7 @@ func spawn_coconut() -> void:
 
 
 func spawn_trash() -> void:
-	var spawn_pos = get_valid_spawn_position(global_position, spawnable_area.shape.radius, 8, 15)
+	var spawn_pos = get_valid_spawn_position_box(spawnable_area, 8, 15)
 	var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
 	add_child(new_obj)
 	new_obj.global_position = spawn_pos
@@ -78,7 +77,7 @@ func is_position_valid(test_position: Vector2, check_radius: float) -> bool:
 	
 	return results.is_empty()
 
-func get_valid_spawn_position(origin: Vector2, radius: float, check_radius: float, max_attempts: int = 10) -> Vector2:
+func get_valid_spawn_position_circle(origin: Vector2, radius: float, check_radius: float, max_attempts: int = 10) -> Vector2:
 	var last_position := origin
 	
 	for i in range(max_attempts):
@@ -90,6 +89,34 @@ func get_valid_spawn_position(origin: Vector2, radius: float, check_radius: floa
 	
 	print("Forcing spawn after ", max_attempts, " attempts")
 	return last_position
+
+func get_valid_spawn_position_box(shape_node: CollisionShape2D, check_radius: float, max_attempts: int = 10) -> Vector2:
+	var last_position := shape_node.global_position
+	var rect_shape: RectangleShape2D = shape_node.shape
+	var half_extents: Vector2 = rect_shape.size / 2.0
+	
+	for i in range(max_attempts):
+		# Local random point inside box
+		var local_offset = Vector2(
+			randf_range(-half_extents.x, half_extents.x),
+			randf_range(-half_extents.y, half_extents.y)
+		)
+		
+		# Convert to global using the shape's transform
+		var test_position = shape_node.global_transform * local_offset
+		
+		if is_position_valid(test_position, check_radius):
+			return test_position
+		
+		last_position = test_position
+	
+	print("Forcing spawn after ", max_attempts, " attempts")
+	return last_position
+
+func get_random_point_in_box(half_extents: Vector2) -> Vector2:
+	var x = randf_range(-half_extents.x, half_extents.x)
+	var y = randf_range(-half_extents.y, half_extents.y)
+	return Vector2(x, y)
 
 func object_taken(object: GrabbableObject) -> void:
 	if object.coconut:

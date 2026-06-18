@@ -1,37 +1,47 @@
-[gd_scene load_steps=6 format=3 uid="uid://bviolgs2uqwk2"]
+[gd_scene load_steps=8 format=3 uid="uid://bviolgs2uqwk2"]
 
 [ext_resource type="Script" uid="uid://dnjop4auq13ex" path="res://coconut_door.gd" id="1_sgmnx"]
-[ext_resource type="Texture2D" uid="uid://8w54gk0laxbm" path="res://Assets/Sprites/DebugSprite.png" id="2_5jqyx"]
+[ext_resource type="Texture2D" uid="uid://cyt3q80d4yo2k" path="res://Assets/Sprites/BeachGate1.png" id="2_sgmnx"]
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_ux0hr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_sgmnx"]
+atlas = ExtResource("2_sgmnx")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5jqyx"]
+atlas = ExtResource("2_sgmnx")
+region = Rect2(32, 32, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2hsqq"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_5jqyx")
+"texture": SubResource("AtlasTexture_sgmnx")
 }],
 "loop": true,
 "name": &"Closed",
 "speed": 5.0
 }, {
-"frames": [],
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5jqyx")
+}],
 "loop": true,
 "name": &"Open",
 "speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2hsqq"]
-size = Vector2(52, 9)
+size = Vector2(32, 16)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sgmnx"]
-size = Vector2(54, 36)
+size = Vector2(54, 57)
 
 [node name="CoconutDoor" type="Area2D"]
 script = ExtResource("1_sgmnx")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 unique_name_in_owner = true
-scale = Vector2(3.25, 1)
-sprite_frames = SubResource("SpriteFrames_ux0hr")
+sprite_frames = SubResource("SpriteFrames_2hsqq")
 animation = &"Closed"
 autoplay = "Closed"
 
@@ -40,9 +50,9 @@ unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionBody"]
 unique_name_in_owner = true
-position = Vector2(0, -5.5)
+position = Vector2(0, -8)
 shape = SubResource("RectangleShape2D_2hsqq")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 8)
+position = Vector2(0, -2.5)
 shape = SubResource("RectangleShape2D_sgmnx")
