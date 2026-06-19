@@ -7,6 +7,8 @@ const TRASH_SPRITES = preload("uid://cs5uqyjinp2l1")
 const TRASH_BAG = preload("uid://dyatiwg2jcp8")
 const TRASH_SHADOWS = preload("uid://cpqcyukv2cqvu")
 const TRASH_BAG_SHADOW = preload("uid://6lqbxc8wyrjp")
+const DUMPSTER = preload("uid://cpbywcmuy45am")
+const COCONUT_VENDING_MACHINE = preload("uid://7ovlb1b2fx1f")
 
 @export var trash_points: int = 0
 @export var dumpster: bool = false
@@ -21,10 +23,12 @@ signal grab_object(obj)
 
 func _ready() -> void:
 	if dumpster:
-		pass
+		sprite.texture = DUMPSTER
 	if trash_bag:
 		sprite.texture = TRASH_BAG
 		shadow_sprite.texture = TRASH_BAG_SHADOW
+	if coconut_shop:
+		sprite.texture = COCONUT_VENDING_MACHINE
 
 func _physics_process(delta):
 	if velocity.length() > 0.1:

@@ -8,7 +8,7 @@ var holding_trash_bag: bool = false
 
 
 var interact_level: int = 0
-var max_trash_count: int = 40
+var max_trash_count: int = 20
 
 var total_region_count: int = 3
 var completed_regions: int = 0

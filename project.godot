@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="ComfyGameJam"
-run/main_scene="uid://b6084mn03x7wj"
+run/main_scene="uid://da283vso6btca"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 

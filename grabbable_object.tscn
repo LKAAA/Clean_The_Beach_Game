@@ -16,7 +16,6 @@ texture = ExtResource("2_bm3s7")
 
 [node name="ShadowSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
-texture = ExtResource("2_bm3s7")
 
 [node name="Detection_Collision_Box" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_k075m")

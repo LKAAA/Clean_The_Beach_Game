@@ -3,123 +3,132 @@ extends Area2D
 const GRABBABLE_OBJECT = preload("uid://co54mxkglvavc")
 
 @export var region_name: String = "Region_Name"
-var trash_complete: bool = false
-var coconut_complete: bool = false
-
-@onready var spawnable_area: CollisionShape2D = %SpawnableArea
 
 @export var max_spawned_trash: int = 20
 @export var max_spawned_coconuts: int = 5
 
-var spawned_trash: Array = []
-var spawned_coconuts: Array = []
+@onready var spawnable_area: CollisionShape2D
 
+var spawned_trash: Array[Node2D] = []
+var spawned_coconuts: Array[Node2D] = []
+
+var trash_complete := false
+var coconut_complete := false
+var region_complete := false
+
+# Minimum spacing between spawned objects
+const MIN_DISTANCE := 16.0
+
+# ========================
+# READY
+# ========================
 func _ready() -> void:
-	for i in range(max_spawned_trash):
-		spawn_trash()
+	spawnable_area = get_child(0)
+	randomize()
+	spawn_all()
 
-	for i in range(max_spawned_coconuts):
-		spawn_coconut()
+func spawn_all() -> void:
+	spawn_group(max_spawned_trash, false)
+	spawn_group(max_spawned_coconuts, true)
 
-func _physics_process(_delta: float) -> void:
-	if spawned_coconuts.is_empty() and not coconut_complete:
-		print("Found all coconuts in the " + region_name + ".")
-		coconut_complete = true
+# ========================
+# SPAWNING
+# ========================
+func spawn_group(amount: int, is_coconut: bool) -> void:
+	var spawned := 0
+	var attempts := 0
+	var max_attempts := amount * 10
 	
-	if spawned_trash.is_empty() and not trash_complete:
-		print("Found all trash in the " + region_name + ".")
-		Global.max_trash_count += 10
-		trash_complete = true
+	while spawned < amount and attempts < max_attempts:
+		var pos = get_random_point_in_box()
+		
+		if is_position_valid(pos):
+			var obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
+			add_child(obj)
+			obj.global_position = pos
+			
+			if is_coconut:
+				obj.set_coconut()
+				spawned_coconuts.append(obj)
+			else:
+				obj.set_trash()
+				spawned_trash.append(obj)
+			
+			obj.grab_object.connect(object_taken)
+			spawned += 1
+		
+		attempts += 1
 	
-	if coconut_complete and trash_complete:
-		print("The " + region_name + " is fully complete!")
-		Global.completed_regions += 1
-		Global.emit_signal("region_complete")
-		queue_free()
+	if spawned < amount:
+		print("⚠ Could only spawn ", spawned, "/", amount, " in ", region_name)
 
-func spawn_coconut() -> void:
-	var spawn_pos = get_valid_spawn_position_box(spawnable_area, 8, 15)
-	var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
-	add_child(new_obj)
-	new_obj.global_position = spawn_pos
-	new_obj.set_coconut()
-	new_obj.grab_object.connect(object_taken)
-	spawned_coconuts.append(new_obj)
+# ========================
+# POSITIONING
+# ========================
+func get_random_point_in_box() -> Vector2:
+	var rect: RectangleShape2D = spawnable_area.shape
+	var half_extents = rect.size / 2.0
+	
+	var local = Vector2(
+		randf_range(-half_extents.x, half_extents.x),
+		randf_range(-half_extents.y, half_extents.y)
+	)
+	
+	return spawnable_area.global_transform * local
 
-
-func spawn_trash() -> void:
-	var spawn_pos = get_valid_spawn_position_box(spawnable_area, 8, 15)
-	var new_obj: GrabbableObject = GRABBABLE_OBJECT.instantiate()
-	add_child(new_obj)
-	new_obj.global_position = spawn_pos
-	new_obj.set_trash()
-	new_obj.grab_object.connect(object_taken)
-	spawned_trash.append(new_obj)
-
-func get_random_point_in_circle(radius: float) -> Vector2:
-	var angle := randf() * TAU
-	var r := sqrt(randf()) * radius
-	return Vector2(cos(angle), sin(angle)) * r
-
-func is_position_valid(test_position: Vector2, check_radius: float) -> bool:
+# ========================
+# VALIDATION
+# ========================
+func is_position_valid(pos: Vector2) -> bool:
+	# 1. Prevent overlap with our own spawned objects
+	for obj in spawned_trash:
+		if obj.global_position.distance_to(pos) < MIN_DISTANCE:
+			return false
+	
+	for obj in spawned_coconuts:
+		if obj.global_position.distance_to(pos) < MIN_DISTANCE:
+			return false
+	
+	# 2. Physics check (optional but good)
 	var space_state = get_world_2d().direct_space_state
 	
 	var shape = CircleShape2D.new()
-	shape.radius = check_radius
+	shape.radius = MIN_DISTANCE / 2.0
 	
 	var query = PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
-	query.transform = Transform2D(0, test_position)
-	query.collide_with_areas = true
+	query.transform = Transform2D(0, pos)
+	query.collide_with_areas = false   # 🔥 IMPORTANT
 	query.collide_with_bodies = true
 	
-	var results = space_state.intersect_shape(query)
-	
-	return results.is_empty()
+	var result = space_state.intersect_shape(query)
+	return result.is_empty()
 
-func get_valid_spawn_position_circle(origin: Vector2, radius: float, check_radius: float, max_attempts: int = 10) -> Vector2:
-	var last_position := origin
-	
-	for i in range(max_attempts):
-		var offset = get_random_point_in_circle(radius)
-		var test_position = origin + offset
-		if is_position_valid(test_position, check_radius):
-			return test_position
-		last_position = test_position
-	
-	print("Forcing spawn after ", max_attempts, " attempts")
-	return last_position
-
-func get_valid_spawn_position_box(shape_node: CollisionShape2D, check_radius: float, max_attempts: int = 10) -> Vector2:
-	var last_position := shape_node.global_position
-	var rect_shape: RectangleShape2D = shape_node.shape
-	var half_extents: Vector2 = rect_shape.size / 2.0
-	
-	for i in range(max_attempts):
-		# Local random point inside box
-		var local_offset = Vector2(
-			randf_range(-half_extents.x, half_extents.x),
-			randf_range(-half_extents.y, half_extents.y)
-		)
-		
-		# Convert to global using the shape's transform
-		var test_position = shape_node.global_transform * local_offset
-		
-		if is_position_valid(test_position, check_radius):
-			return test_position
-		
-		last_position = test_position
-	
-	print("Forcing spawn after ", max_attempts, " attempts")
-	return last_position
-
-func get_random_point_in_box(half_extents: Vector2) -> Vector2:
-	var x = randf_range(-half_extents.x, half_extents.x)
-	var y = randf_range(-half_extents.y, half_extents.y)
-	return Vector2(x, y)
-
+# ========================
+# TRACKING
+# ========================
 func object_taken(object: GrabbableObject) -> void:
 	if object.coconut:
 		spawned_coconuts.erase(object)
 	else:
 		spawned_trash.erase(object)
+
+# ========================
+# PROGRESSION
+# ========================
+func _physics_process(_delta: float) -> void:
+	if not coconut_complete and spawned_coconuts.is_empty():
+		print("Found all coconuts in ", region_name)
+		coconut_complete = true
+	
+	if not trash_complete and spawned_trash.is_empty():
+		print("Found all trash in ", region_name)
+		Global.max_trash_count += 10
+		trash_complete = true
+	
+	if coconut_complete and trash_complete and not region_complete:
+		region_complete = true
+		print("Region complete:", region_name)
+		Global.completed_regions += 1
+		Global.emit_signal("region_complete")
+		queue_free()

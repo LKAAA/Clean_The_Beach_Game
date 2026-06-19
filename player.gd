@@ -187,44 +187,39 @@ func _physics_process(delta: float) -> void:
 				print("Picked up a trashbag")
 			else:
 				print("Already holding a trash bag. Take it to the dumpster first.")
-		elif cur_grab_obj.coconut_shop:
+		elif cur_grab_obj.coconut_shop and not Global.dialogue_active:
 			if not Progression.met_squirrel:
 				Global.core._request_dialogue(["Psst.{p=0.3} Hey.{p=0.3} Over here.",  
-				"Got any nuts?", 
-				"Coconuts that is.", 
-				"I’ll buy em off ya.{p=0.3} I’ll teach ya things.", 
-				"Great things.{p=0.3} Like how to pick up faster.", 
-				"I’m good at that, yeah?{p=0.3} Great at that.{p=0.3} Squirrel thing, ya know?", 
-				"Let me know if you find any.{p=0.3} Sees ya's around."], 
-				"Squirrel")
+				"*The machine shakes and buzzes*", 
+				"*You squint at it*", 
+				"*There is faint writing that says 'insert coconut for cool thing'"], 
+				"Machine")
 				Progression.met_squirrel = true
 			elif Global.interact_level != 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["Oh yeah that's a good nut.",  
-				"Could do with more ya know.", 
-				"Coconuts that is.", 
-				"But here ya go, watch closely.{p=0.3} You pick it up like this yeah?", 
-				"*Picks up coconut*", 
-				"See, like that.", 
-				"*You now know how to pick things up slightly faster.{p=0.3} He’s a good teacher.*"], 
-				"Squirrel")
+				Global.core._request_dialogue(["*You shove a coconut into the machine's slot*",  
+				"*The machine starts shaking violently and theres alot of screeching*", 
+				"*The machine goes silent*", 
+				"*A hastily scrawled note gets shoved back out of the slot*", 
+				"It says: 'Cool reward'",
+				"*You feel slightly angrier* (You pick up things faster now)"], 
+				"Machine")
 				Global.interact_level += 1
 				Global.coconut_count -= 1
 			elif Global.interact_level == 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["This might be the best one yet.", 
-				"I’ll teach you my magnum opus yeah?", 
-				"*The squirrel picks up the coconut, but this time an explosion appears when he picks it up.*", 
-				"*You now know how to pick things up with style.{p=0.3} He’s a really good teacher.*"
-				], "Squirrel")
+				Global.core._request_dialogue(["*You shove a coconut into the machine's slot*",  
+				"*The machine starts shaking violently and theres alot of screeching*", 
+				"*The machine goes silent*", 
+				"*A hastily scrawled note gets shoved back out of the slot*", 
+				"It says: 'omg I'm so full pls stop",
+				], "Machine")
 				Global.interact_level += 1
 				Global.coconut_count -= 1
 			elif Global.coconut_count > 0:
-				Global.core._request_dialogue(["I ain’t got no more to teach ya, yeah?", 
-				"You a master now yeah?", 
-				"Though that coconut do look tasty…"], 
-				"Squirrel")
+				Global.core._request_dialogue(["Theres a note taped to the front. It reads:", "'Please leave me alone I can't eat anymore'"], 
+				"Machine")
 			else:
-				Global.core._request_dialogue(["Let's me know if you find any coconuts."], 
-				"Squirrel")
+				Global.core._request_dialogue(["There seems to be a slot for coconuts."], 
+				"Machine")
 			print("Open Shop")
 		# If coconut or trash pick up
 		else:
