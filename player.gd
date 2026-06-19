@@ -25,6 +25,8 @@ var trash_bags_dumped: int = 0
 var cur_door: CoconutDoor = null
 var cur_man: DumpsterMan = null
 
+var coconut_given: bool = false
+
 
 func _ready() -> void:
 	interaction_progress_bar.visible = false
@@ -127,6 +129,7 @@ func _physics_process(delta: float) -> void:
 				new_obj.set_coconut()
 				throw_object(new_obj, global_position)
 				Global.current_tutorial_part = 5
+				Global.core.start_random_timer()
 				
 		# If Trash Bag
 		elif cur_grab_obj.trash_bag:
@@ -187,41 +190,66 @@ func _physics_process(delta: float) -> void:
 				print("Picked up a trashbag")
 			else:
 				print("Already holding a trash bag. Take it to the dumpster first.")
-		elif cur_grab_obj.coconut_shop and not Global.dialogue_active:
+		elif cur_grab_obj.coconut_shop and not Global.dialogue_active and not Global.core.dialogue_cooldown and not coconut_given:
+			coconut_given = true
+			
+			# First interaction (no coconut used)
 			if not Progression.met_squirrel:
-				Global.core._request_dialogue(["Psst.{p=0.3} Hey.{p=0.3} Over here.",  
-				"*The machine shakes and buzzes*", 
-				"*You squint at it*", 
-				"*There is faint writing that says 'insert coconut for cool thing'"], 
-				"Machine")
-				Progression.met_squirrel = true
-			elif Global.interact_level != 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["*You shove a coconut into the machine's slot*",  
-				"*The machine starts shaking violently and theres alot of screeching*", 
-				"*The machine goes silent*", 
-				"*A hastily scrawled note gets shoved back out of the slot*", 
-				"It says: 'Cool reward'",
-				"*You feel slightly angrier* (You pick up things faster now)"], 
-				"Machine")
-				Global.interact_level += 1
-				Global.coconut_count -= 1
-			elif Global.interact_level == 4 and Global.coconut_count > 0:
-				Global.core._request_dialogue(["*You shove a coconut into the machine's slot*",  
-				"*The machine starts shaking violently and theres alot of screeching*", 
-				"*The machine goes silent*", 
-				"*A hastily scrawled note gets shoved back out of the slot*", 
-				"It says: 'omg I'm so full pls stop",
+				Global.core._request_dialogue([
+					"*The machine shakes and buzzes*", 
+					"*You squint at it*", 
+					"*There is faint writing that says 'insert coconut for cool thing'"
 				], "Machine")
-				Global.interact_level += 1
-				Global.coconut_count -= 1
-			elif Global.coconut_count > 0:
-				Global.core._request_dialogue(["Theres a note taped to the front. It reads:", "'Please leave me alone I can't eat anymore'"], 
-				"Machine")
+				Progression.met_squirrel = true
+			
+			# Can use coconut
+			elif Global.coconut_count > 0 or Global.interact_level == 5:
+				
+				# Levels 0–3
+				if Global.interact_level < 4:
+					Global.core._request_dialogue([
+						"*You shove a coconut into the machine's slot*",  
+						"*The machine starts shaking violently and theres alot of screeching*", 
+						"*The machine goes silent*", 
+						"*A hastily scrawled note gets shoved back out of the slot*", 
+						"It says: 'Cool reward'",
+						"*You feel slightly angrier* (You pick up things faster now)"
+					], "Machine")
+					
+					Global.interact_level += 1
+					Global.coconut_count -= 1   # ✅ ONLY HERE
+				
+				# Level 4
+				elif Global.interact_level == 4:
+					Global.core._request_dialogue([
+						"*You shove a coconut into the machine's slot*",  
+						"*The machine starts shaking violently and theres alot of screeching*", 
+						"*The machine goes silent*", 
+						"*A hastily scrawled note gets shoved back out of the slot*", 
+						"It says: 'omg I'm so full pls stop'"
+					], "Machine")
+					
+					Global.interact_level += 1
+					Global.coconut_count -= 1   # ✅ ONLY HERE
+				
+				# Level 5+
+				else:
+					Global.core._request_dialogue([
+						"Theres a note taped to the front. It reads:",
+						"'Please leave me alone I can't eat anymore'"
+					], "Machine")
+			
+			# No coconuts
 			else:
-				Global.core._request_dialogue(["There seems to be a slot for coconuts."], 
-				"Machine")
+				Global.core._request_dialogue([
+					"There seems to be a slot for coconuts."
+				], "Machine")
+			
 			print("Open Shop")
-		# If coconut or trash pick up
+			
+			# Small delay recommended instead of instant reset
+			await get_tree().create_timer(0.2).timeout
+			coconut_given = false
 		else:
 			if Global.holding_trash_bag or cur_grab_obj.coconut:
 				interacting = true

@@ -19,7 +19,6 @@ func update_message(message: String, npc_name: String = "") -> void:
 	dialogue_text_label.bbcode_text = dialogue_commands.extract_pauses_from_string(message)
 	dialogue_text_label.visible_characters = 0
 	
-	print(npc_name)
 	if not npc_name == "":
 		character_name_section.visible = true
 		name_text_label.bbcode_text = npc_name

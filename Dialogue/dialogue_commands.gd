@@ -45,7 +45,6 @@ func check_at_position(pos: int) -> void:
 			emit_signal("pause_requested", _pause.duration)
 
 func _find_pauses(source: String) -> void:
-	print("Finding pauses")
 	_pauses = []
 	
 	var index := 0

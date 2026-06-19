@@ -115,7 +115,7 @@ position = Vector2(387, -43)
 collision_layer = 2
 script = ExtResource("3_feb5d")
 region_name = "Northern Region"
-max_spawned_trash = 10
+max_spawned_trash = 2
 max_spawned_coconuts = 3
 
 [node name="SpawnableArea" type="CollisionShape2D" parent="Interactable_Spawn_Area"]
@@ -127,8 +127,8 @@ position = Vector2(325, -627)
 collision_layer = 2
 script = ExtResource("3_feb5d")
 region_name = "Middle Region"
-max_spawned_trash = 15
-max_spawned_coconuts = 4
+max_spawned_trash = 2
+max_spawned_coconuts = 3
 
 [node name="SpawnableArea" type="CollisionShape2D" parent="Interactable_Spawn_Area2"]
 position = Vector2(60, -9.5)
@@ -139,7 +139,7 @@ position = Vector2(375, -911)
 collision_layer = 2
 script = ExtResource("3_feb5d")
 region_name = "Southern Region"
-max_spawned_trash = 25
+max_spawned_trash = 2
 max_spawned_coconuts = 4
 
 [node name="SpawnableArea" type="CollisionShape2D" parent="Interactable_Spawn_Area3"]
@@ -251,20 +251,15 @@ position = Vector2(400, -752)
 position = Vector2(240, -224)
 
 [node name="StartTimer" type="Timer" parent="."]
-wait_time = 3.0
+wait_time = 5.0
 one_shot = true
 autostart = true
-
-[node name="RandomTimer" type="Timer" parent="."]
-unique_name_in_owner = true
-one_shot = true
 
 [connection signal="finished" from="Dialogue_Manager" to="." method="_on_dialogue_manager_finished"]
 [connection signal="message_completed" from="Dialogue_Manager" to="." method="_on_dialogue_manager_message_completed"]
 [connection signal="message_requested" from="Dialogue_Manager" to="." method="_on_dialogue_manager_message_requested"]
 [connection signal="timeout" from="DialogueCooldownTimer" to="." method="_on_dialogue_cooldown_timer_timeout"]
 [connection signal="timeout" from="StartTimer" to="." method="_on_start_timer_timeout"]
-[connection signal="timeout" from="RandomTimer" to="." method="_on_random_timer_timeout"]
 
 [editable path="Trash_Bag"]
 [editable path="Trash_Bag3"]
